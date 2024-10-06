@@ -50,7 +50,7 @@ MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas) {
 }
 
 //Función para el producto entre matriz y vector 
-void my_sparse(const MatrizCSR* matriz_csr, const double* vector, double* resultado){
+int my_sparse(const MatrizCSR* matriz_csr, const double* vector, double* resultado){
 
 	//Inicializo vector
 	for (int fila = 0; fila < matriz_csr->num_filas; fila++) {

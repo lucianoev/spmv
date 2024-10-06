@@ -14,7 +14,7 @@ typedef struct {
 // Declaraciones de funciones
 int my_dense(const unsigned int n, const double mat[], double vec[], double result[]);
 MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas); // Nueva función de conversión
-void my_sparse(const MatrizCSR* matriz_csr, double vec[], double result[]); // Producto de matriz CSR con vector
+int my_sparse(const MatrizCSR* matriz_csr, double vec[], double result[]); // Producto de matriz CSR con vector
 
 #endif // SPMV_H
 
