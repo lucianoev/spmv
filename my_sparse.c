@@ -2,14 +2,14 @@
 #include "stdio.h"
 #include <stdlib.h>
 
-typedef struct {
+/*typedef struct {
     int* fila_inicio;       // Índices de inicio de cada fila
     int* indices_columnas;  // Índices de las columnas de los elementos no cero
     double* val;            // Valores de los elementos no cero
     int num_filas;          // Número de filas
     int num_columnas;       // Número de columnas
     int num_sin_ceros;      // Número de elementos no cero
-} MatrizCSR;
+} MatrizCSR;*/
 
 MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas) {
     MatrizCSR csr;
@@ -50,7 +50,7 @@ MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas) {
 }
 
 //Función para el producto entre matriz y vector 
-int my_sparse(const MatrizCSR* matriz_csr, const double* vector, double* resultado){
+int my_sparse(const MatrizCSR* matriz_csr, double vector[], double resultado[]){
 
 	//Inicializo vector
 	for (int fila = 0; fila < matriz_csr->num_filas; fila++) {
@@ -58,9 +58,9 @@ int my_sparse(const MatrizCSR* matriz_csr, const double* vector, double* resulta
 	}
 
 	//Producto de matriz CSR con vector
-	for (int fila = 0; fila < matriz_csr.num_filas; fila++) {
-		        for (int idx = matriz_csr.fila_inicio[fila]; idx < matriz_csr.fila_inicio[fila + 1]; idx++) {
-				            resultado[fila] += matriz_csr.valores[idx] * vector[matriz_csr.indices_columnas[idx]];    
+	for (int fila = 0; fila < matriz_csr->num_filas; fila++) {
+		        for (int idx = matriz_csr->fila_inicio[fila]; idx < matriz_csr->fila_inicio[fila + 1]; idx++) {
+				            resultado[fila] += matriz_csr->val[idx] * vector[matriz_csr->indices_columnas[idx]];    
 			}
 	}
 	return 0; // Retorna 0 si todo salió bien

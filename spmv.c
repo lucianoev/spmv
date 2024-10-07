@@ -53,6 +53,7 @@ unsigned int check_result(double ref[], double result[], unsigned int size)
     return 1;
 }
 
+/*
 // Función para convertir matriz densa a CSR
 MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas) {
     // Contar elementos no cero
@@ -104,7 +105,7 @@ void my_sparse(const MatrizCSR* matriz_csr, double vec[], double result[]) {
             result[fila] += matriz_csr->val[idx] * vec[matriz_csr->indices_columnas[idx]];
         }
     }
-}
+}*/
 
 // Función principal
 int main(int argc, char *argv[])
