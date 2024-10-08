@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_cblas.h>      // CBLAS in GSL (the GNU Scientific Library)
+#include <gsl/gsl_spmatrix.h>   // GSL sparse matrix functions
+#include <gsl/gsl_vector.h>     // GSL vector functions
 #include "timer.h"
 #include "spmv.h"
 
@@ -174,6 +176,42 @@ int main(int argc, char *argv[])
     else
         printf("Sparse result is wrong!\n");
 
+ // Ahora, usar GSL para producto disperso
+    printf("\nGSL Sparse computation\n----------------------\n");
+
+    // Crear matriz dispersa GSL en formato CSR
+    gsl_spmatrix *gsl_csr = gsl_spmatrix_alloc(size, size);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (mat[i * size + j] != 0) {
+                gsl_spmatrix_set(gsl_csr, i, j, mat[i * size + j]);
+            }
+        }
+    }
+
+    // Crear vector GSL
+    gsl_vector *gsl_vec = gsl_vector_alloc(size);
+    gsl_vector *gsl_result = gsl_vector_alloc(size);
+    for (int i = 0; i < size; i++) {
+        gsl_vector_set(gsl_vec, i, vec[i]);
+    }
+
+    // Multiplicar matriz dispersa con vector usando GSL
+    timestamp(&start);
+    gsl_spmatrix_dgemv(CblasNoTrans, 1.0, gsl_csr, gsl_vec, 0.0, gsl_result);
+    timestamp(&now);
+    printf("Time taken by GSL sparse matrix-vector product: %ld ms\n", diff_milli(&start, &now));
+
+    // Comprobar resultados
+    for (int i = 0; i < size; i++) {
+        mysol[i] = gsl_vector_get(gsl_result, i);
+    }
+
+    if (check_result(refsol, mysol, size) == 1)
+        printf("GSL sparse result is ok!\n");
+    else
+        printf("GSL sparse result is wrong!\n");
+
     // Liberar recursos
     free(mat);
     free(vec);
@@ -182,6 +220,9 @@ int main(int argc, char *argv[])
     free(matriz_csr.fila_inicio);
     free(matriz_csr.indices_columnas);
     free(matriz_csr.val);
+    gsl_spmatrix_free(gsl_csr);
+    gsl_vector_free(gsl_vec);
+    gsl_vector_free(gsl_result);
 
     return 0;
 }
