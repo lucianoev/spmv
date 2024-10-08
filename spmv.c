@@ -125,6 +125,10 @@ int main(int argc, char *argv[])
     int size;        // number of rows and cols (size x size matrix)
     double density;  // aprox. ratio of non-zero values
 
+    gsl_spmatrix *gsl_spmat = gsl_spmatrix_alloc(size, size); // Declarar la matriz dispersa
+    gsl_vector *gsl_vec = gsl_vector_alloc(size);             // Declarar el vector
+    gsl_vector *gsl_result = gsl_vector_alloc(size);  
+
     if (argc < 2) {
         size = DEFAULT_SIZE;
         density = DEFAULT_DENSITY;
