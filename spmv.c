@@ -55,6 +55,16 @@ unsigned int check_result(double ref[], double result[], unsigned int size)
     return 1;
 }
 
+void gsl_spmatrix_vector_multiply(const gsl_spmatrix *spmat, const gsl_vector *vec, gsl_vector *result)
+{
+    for (size_t i = 0; i < spmat->size1; i++) {
+        double sum = 0.0;
+        for (size_t j = 0; j < spmat->size2; j++) {
+            sum += gsl_spmatrix_get(spmat, i, j) * gsl_vector_get(vec, j);
+        }
+        gsl_vector_set(result, i, sum);
+    }
+}
 /*
 // Función para convertir matriz densa a CSR
 MatrizCSR convert_to_csr(const double* mat, int num_filas, int num_columnas) {
@@ -176,43 +186,51 @@ int main(int argc, char *argv[])
     else
         printf("Sparse result is wrong!\n");
 
- // Ahora, usar GSL para producto disperso
-    printf("\nGSL Sparse computation\n----------------------\n");
+    // Usando la matriz dispersa de GSL y multiplicación
+    gsl_spmat = gsl_spmatrix_alloc(size, size);
 
-    // Crear matriz dispersa GSL en formato CSR
-    gsl_spmatrix *gsl_csr = gsl_spmatrix_alloc(size, size);
+    // Convertir la matriz densa en dispersa en GSL
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            if (mat[i * size + j] != 0) {
-                gsl_spmatrix_set(gsl_csr, i, j, mat[i * size + j]);
+            double val = mat[i * size + j];
+            if (val != 0) {
+                gsl_spmatrix_set(gsl_spmat, i, j, val);
             }
         }
     }
 
-    // Crear vector GSL
-    gsl_vector *gsl_vec = gsl_vector_alloc(size);
-    gsl_vector *gsl_result = gsl_vector_alloc(size);
+    gsl_vec = gsl_vector_alloc(size);
+    gsl_result = gsl_vector_alloc(size);
+
+    // Llenar el vector GSL
     for (int i = 0; i < size; i++) {
         gsl_vector_set(gsl_vec, i, vec[i]);
     }
 
-    // Multiplicar matriz dispersa con vector usando GSL
+    // Multiplicación dispersa usando GSL
     timestamp(&start);
-    gsl_spmatrix_dgemv(CblasNoTrans, 1.0, gsl_csr, gsl_vec, 0.0, gsl_result);
+    gsl_spmatrix_vector_multiply(gsl_spmat, gsl_vec, gsl_result);
     timestamp(&now);
     printf("Time taken by GSL sparse matrix-vector product: %ld ms\n", diff_milli(&start, &now));
 
-    // Comprobar resultados
+    // Comprobar el resultado de GSL
+    int gsl_ok = 1;
     for (int i = 0; i < size; i++) {
-        mysol[i] = gsl_vector_get(gsl_result, i);
+        if (!is_nearly_equal(gsl_vector_get(gsl_result, i), refsol[i])) {
+            gsl_ok = 0;
+            break;
+        }
     }
 
-    if (check_result(refsol, mysol, size) == 1)
-        printf("GSL sparse result is ok!\n");
+    if (gsl_ok)
+        printf("Sparse result with GSL is ok!\n");
     else
-        printf("GSL sparse result is wrong!\n");
+        printf("Sparse result with GSL is wrong!\n");
 
     // Liberar recursos
+    gsl_spmatrix_free(gsl_spmat);
+    gsl_vector_free(gsl_vec);
+    gsl_vector_free(gsl_result);
     free(mat);
     free(vec);
     free(refsol);
@@ -220,9 +238,7 @@ int main(int argc, char *argv[])
     free(matriz_csr.fila_inicio);
     free(matriz_csr.indices_columnas);
     free(matriz_csr.val);
-    gsl_spmatrix_free(gsl_csr);
-    gsl_vector_free(gsl_vec);
-    gsl_vector_free(gsl_result);
+
 
     return 0;
 }
